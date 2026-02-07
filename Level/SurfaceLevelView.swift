@@ -8,6 +8,14 @@ struct SurfaceLevelView: View {
         horizontalSizeClass == .regular
     }
 
+    @State private var isPitchOnTop: Bool = true
+    @State private var isPitchOnRight: Bool = false
+
+    @State private var dragTopActive: Bool = false
+    @State private var dragBottomActive: Bool = false
+    @State private var dragLeftActive: Bool = false
+    @State private var dragRightActive: Bool = false
+
     var body: some View {
         GeometryReader { geometry in
             let isLandscape = geometry.size.width > geometry.size.height
@@ -22,55 +30,238 @@ struct SurfaceLevelView: View {
 
     @ViewBuilder
     private func portraitLayout(geometry: GeometryProxy) -> some View {
+        let dividerSpacing: CGFloat = 6 // 3pt padding on each side of the divider
+        let availableHeight = geometry.size.height - dividerSpacing
+        let topHeight = availableHeight * 0.65
+        let bottomHeight = availableHeight - topHeight
+
         VStack(spacing: 0) {
-            // Top half - Pitch
-            AxisLevelStrip(
-                angle: viewModel.pitch,
-                color: viewModel.levelColor,
-                axis: .vertical,
-                isLevel: abs(viewModel.pitch) < 0.5
-            )
-            .frame(height: geometry.size.height / 2)
+            if isPitchOnTop {
+                // Top - Pitch
+                AxisLevelStrip(
+                    angle: viewModel.pitch,
+                    color: viewModel.levelColor,
+                    axis: .vertical,
+                    isLevel: abs(viewModel.pitch) < 0.5
+                )
+                .frame(height: topHeight)
+                .padding(.bottom, 3)
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    LongPressGesture(minimumDuration: 0.3)
+                        .onEnded { _ in dragTopActive = true }
+                )
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if dragTopActive && value.translation.height > 40 {
+                                isPitchOnTop.toggle()
+                                HapticManager.shared.tapFeedback()
+                                dragTopActive = false
+                            }
+                        }
+                        .onEnded { _ in dragTopActive = false }
+                )
 
-            Divider()
-                .background(Color.white.opacity(0.2))
-                .padding(.vertical, 12)
+                Divider()
+                    .background(Color.white.opacity(0.2))
 
-            // Bottom half - Roll
-            AxisLevelStrip(
-                angle: viewModel.roll,
-                color: viewModel.levelColor,
-                axis: .horizontal,
-                isLevel: abs(viewModel.roll) < 0.5
-            )
-            .frame(height: geometry.size.height / 2)
+                // Bottom - Roll
+                AxisLevelStrip(
+                    angle: viewModel.roll,
+                    color: viewModel.levelColor,
+                    axis: .horizontal,
+                    isLevel: abs(viewModel.roll) < 0.5
+                )
+                .frame(height: bottomHeight)
+                .padding(.top, 3)
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    LongPressGesture(minimumDuration: 0.3)
+                        .onEnded { _ in dragBottomActive = true }
+                )
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if dragBottomActive && value.translation.height < -40 {
+                                isPitchOnTop.toggle()
+                                HapticManager.shared.tapFeedback()
+                                dragBottomActive = false
+                            }
+                        }
+                        .onEnded { _ in dragBottomActive = false }
+                )
+            } else {
+                // Top - Roll
+                AxisLevelStrip(
+                    angle: viewModel.roll,
+                    color: viewModel.levelColor,
+                    axis: .horizontal,
+                    isLevel: abs(viewModel.roll) < 0.5
+                )
+                .frame(height: topHeight)
+                .padding(.bottom, 3)
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    LongPressGesture(minimumDuration: 0.3)
+                        .onEnded { _ in dragTopActive = true }
+                )
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if dragTopActive && value.translation.height > 40 {
+                                isPitchOnTop.toggle()
+                                HapticManager.shared.tapFeedback()
+                                dragTopActive = false
+                            }
+                        }
+                        .onEnded { _ in dragTopActive = false }
+                )
+
+                Divider()
+                    .background(Color.white.opacity(0.2))
+
+                // Bottom - Pitch
+                AxisLevelStrip(
+                    angle: viewModel.pitch,
+                    color: viewModel.levelColor,
+                    axis: .vertical,
+                    isLevel: abs(viewModel.pitch) < 0.5
+                )
+                .frame(height: bottomHeight)
+                .padding(.top, 3)
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    LongPressGesture(minimumDuration: 0.3)
+                        .onEnded { _ in dragBottomActive = true }
+                )
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if dragBottomActive && value.translation.height < -40 {
+                                isPitchOnTop.toggle()
+                                HapticManager.shared.tapFeedback()
+                                dragBottomActive = false
+                            }
+                        }
+                        .onEnded { _ in dragBottomActive = false }
+                )
+            }
         }
     }
 
     @ViewBuilder
     private func landscapeLayout(geometry: GeometryProxy) -> some View {
         HStack(spacing: 0) {
-            // Left half - Roll
-            AxisLevelStrip(
-                angle: viewModel.roll,
-                color: viewModel.levelColor,
-                axis: .horizontal,
-                isLevel: abs(viewModel.roll) < 0.5
-            )
-            .frame(width: geometry.size.width / 2)
+            if isPitchOnRight {
+                // Left - Roll
+                AxisLevelStrip(
+                    angle: viewModel.roll,
+                    color: viewModel.levelColor,
+                    axis: .horizontal,
+                    isLevel: abs(viewModel.roll) < 0.5
+                )
+                .frame(width: geometry.size.width / 2)
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    LongPressGesture(minimumDuration: 0.3)
+                        .onEnded { _ in dragLeftActive = true }
+                )
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if dragLeftActive && value.translation.width > 40 {
+                                isPitchOnRight.toggle()
+                                HapticManager.shared.tapFeedback()
+                                dragLeftActive = false
+                            }
+                        }
+                        .onEnded { _ in dragLeftActive = false }
+                )
 
-            Divider()
-                .background(Color.white.opacity(0.2))
-                .padding(.horizontal, 12)
+                Divider()
+                    .background(Color.white.opacity(0.2))
+                    .padding(.horizontal, 12)
 
-            // Right half - Pitch
-            AxisLevelStrip(
-                angle: viewModel.pitch,
-                color: viewModel.levelColor,
-                axis: .vertical,
-                isLevel: abs(viewModel.pitch) < 0.5
-            )
-            .frame(width: geometry.size.width / 2)
+                // Right - Pitch
+                AxisLevelStrip(
+                    angle: viewModel.pitch,
+                    color: viewModel.levelColor,
+                    axis: .vertical,
+                    isLevel: abs(viewModel.pitch) < 0.5
+                )
+                .frame(width: geometry.size.width / 2)
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    LongPressGesture(minimumDuration: 0.3)
+                        .onEnded { _ in dragRightActive = true }
+                )
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if dragRightActive && value.translation.width < -40 {
+                                isPitchOnRight.toggle()
+                                HapticManager.shared.tapFeedback()
+                                dragRightActive = false
+                            }
+                        }
+                        .onEnded { _ in dragRightActive = false }
+                )
+            } else {
+                // Left - Pitch
+                AxisLevelStrip(
+                    angle: viewModel.pitch,
+                    color: viewModel.levelColor,
+                    axis: .vertical,
+                    isLevel: abs(viewModel.pitch) < 0.5
+                )
+                .frame(width: geometry.size.width / 2)
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    LongPressGesture(minimumDuration: 0.3)
+                        .onEnded { _ in dragLeftActive = true }
+                )
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if dragLeftActive && value.translation.width > 40 {
+                                isPitchOnRight.toggle()
+                                HapticManager.shared.tapFeedback()
+                                dragLeftActive = false
+                            }
+                        }
+                        .onEnded { _ in dragLeftActive = false }
+                )
+
+                Divider()
+                    .background(Color.white.opacity(0.2))
+                    .padding(.horizontal, 12)
+
+                // Right - Roll
+                AxisLevelStrip(
+                    angle: viewModel.roll,
+                    color: viewModel.levelColor,
+                    axis: .horizontal,
+                    isLevel: abs(viewModel.roll) < 0.5
+                )
+                .frame(width: geometry.size.width / 2)
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    LongPressGesture(minimumDuration: 0.3)
+                        .onEnded { _ in dragRightActive = true }
+                )
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if dragRightActive && value.translation.width < -40 {
+                                isPitchOnRight.toggle()
+                                HapticManager.shared.tapFeedback()
+                                dragRightActive = false
+                            }
+                        }
+                        .onEnded { _ in dragRightActive = false }
+                )
+            }
         }
     }
 }
@@ -122,7 +313,6 @@ struct AxisLevelStrip: View {
                 .frame(width: axis == .horizontal ? 280 : 60,
                        height: axis == .horizontal ? 60 : 280)
             }
-            .padding(.vertical, 16)
         }
     }
 

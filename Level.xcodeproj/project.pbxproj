@@ -7,16 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A01 /* LevelApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01; };
-		A02 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02; };
-		A03 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B03; };
-		A04 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04; };
-		A05 /* BubbleLevelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05; };
-		A06 /* SurfaceLevelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06; };
-		A07 /* LevelViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07; };
-		A08 /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B08; };
-		A09 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09; };
-		A10 /* AngleDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10; };
+		A01 /* LevelApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01 /* LevelApp.swift */; };
+		A02 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02 /* ContentView.swift */; };
+		A03 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B03 /* Assets.xcassets */; };
+		A04 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04 /* MotionManager.swift */; };
+		A05 /* BubbleLevelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05 /* BubbleLevelView.swift */; };
+		A06 /* SurfaceLevelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06 /* SurfaceLevelView.swift */; };
+		A07 /* LevelViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07 /* LevelViewModel.swift */; };
+		A08 /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B08 /* CalibrationView.swift */; };
+		A09 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09 /* HapticManager.swift */; };
+		A10 /* AngleDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10 /* AngleDisplayView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -308,6 +308,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -342,6 +344,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

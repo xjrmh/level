@@ -62,7 +62,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                         // Angle readings below bubble
-                        HStack(spacing: 40) {
+                        HStack(spacing: 24) {
                             AngleDisplayView(
                                 angle: viewModel.pitch,
                                 label: "Pitch",
@@ -143,7 +143,7 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             // Angle readings
-            HStack(spacing: 40) {
+            HStack(spacing: 24) {
                 AngleDisplayView(
                     angle: viewModel.pitch,
                     label: "Pitch",
