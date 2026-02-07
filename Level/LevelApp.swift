@@ -1,7 +1,15 @@
 import SwiftUI
 
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        // Lock to portrait - we handle rotation manually by rotating text
+        return .portrait
+    }
+}
+
 @main
 struct LevelApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var viewModel: LevelViewModel
 
     init() {

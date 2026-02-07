@@ -32,7 +32,7 @@ final class LevelViewModel: ObservableObject {
 
     var levelColor: Color {
         if abs(pitch) < 0.5 && abs(roll) < 0.5 {
-            return .green
+            return .levelBright
         } else if abs(pitch) < 2.0 && abs(roll) < 2.0 {
             return .yellow
         }

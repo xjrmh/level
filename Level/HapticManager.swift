@@ -16,7 +16,7 @@ final class HapticManager {
     }
 
     func checkLevel(pitch: Double, roll: Double, threshold: Double = 0.5) {
-        let isLevel = abs(pitch) <= threshold && abs(roll) <= threshold
+        let isLevel = abs(pitch) < threshold && abs(roll) < threshold
 
         if isLevel && !wasLevel {
             notificationGenerator.notificationOccurred(.success)

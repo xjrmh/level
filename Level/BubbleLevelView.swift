@@ -18,7 +18,7 @@ struct BubbleLevelView: View {
     }
 
     private var ringColor: Color {
-        viewModel.isLevel ? .green : .white.opacity(0.3)
+        viewModel.isLevel ? .levelBright : .white.opacity(0.3)
     }
 
     private var bubbleColor: Color {
@@ -49,7 +49,7 @@ struct BubbleLevelView: View {
 
                 // Level dot at center (shows when level)
                 Circle()
-                    .fill(viewModel.isLevel ? .green.opacity(0.3) : .clear)
+                    .fill(viewModel.isLevel ? Color.levelBright.opacity(0.28) : .clear)
                     .frame(width: ringSize * scale, height: ringSize * scale)
                     .animation(.easeInOut(duration: 0.2), value: viewModel.isLevel)
 

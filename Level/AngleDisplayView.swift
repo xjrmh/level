@@ -14,7 +14,7 @@ struct AngleDisplayView: View {
     }
 
     private var formattedAngle: String {
-        String(format: "%.2f", abs(angle))
+        String(format: "%.1f", abs(angle))
     }
 
     var body: some View {

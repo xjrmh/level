@@ -4,10 +4,14 @@ struct CalibrationView: View {
     @ObservedObject var viewModel: LevelViewModel
     @Environment(\.dismiss) private var dismiss
 
+    private var backgroundColor: Color {
+        viewModel.isLevel ? Color.levelBright : Color.black
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                backgroundColor.ignoresSafeArea()
 
                 VStack(spacing: 40) {
                     Spacer()
@@ -81,6 +85,7 @@ struct CalibrationView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            .animation(.easeInOut(duration: 0.25), value: viewModel.isLevel)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
@@ -100,7 +105,7 @@ struct CalibrationView: View {
                 .textCase(.uppercase)
                 .tracking(1)
 
-            Text(String(format: "%.2f\u{00B0}", value))
+            Text(String(format: "%.1f\u{00B0}", value))
                 .font(.system(size: 24, weight: .light, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(.white)
