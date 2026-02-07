@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Minimal iOS app icon: conceptual "level" with sharper geometry -->
+  <rect width="1024" height="1024" rx="200" fill="#00E676"/>
+
+  <!-- Level shape (less round / more angular) -->
+  <rect x="176" y="416" width="672" height="192" rx="44"
+        fill="none" stroke="#FFFFFF" stroke-width="56" stroke-linejoin="miter"/>
+
+  <!-- Bubble -->
+  <circle cx="512" cy="512" r="42" fill="#FFFFFF"/>
+</svg>
