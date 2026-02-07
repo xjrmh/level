@@ -105,7 +105,7 @@ struct CalibrationView: View {
                 .textCase(.uppercase)
                 .tracking(1)
 
-            Text(String(format: "%.1f\u{00B0}", value))
+            Text(String(format: "%.1f", value))
                 .font(.system(size: 24, weight: .light, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(.white)

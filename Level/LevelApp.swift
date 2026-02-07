@@ -1,10 +1,34 @@
 import SwiftUI
+import UIKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+    private var orientationObserver: NSObjectProtocol?
+
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
-        // Lock to portrait - we handle rotation manually by rotating text
+        // Lock to portrait on both iPhone and iPad
+        // We handle rotation manually by rotating text to stay upright
+        // while keeping level indicators fixed
         return .portrait
     }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        guard UIDevice.current.userInterfaceIdiom == .pad else { return }
+        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+        orientationObserver = NotificationCenter.default.addObserver(
+            forName: UIDevice.orientationDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { _ in }
+    }
+
+    func applicationWillResignActive(_ application: UIApplication) {
+        if let orientationObserver {
+            NotificationCenter.default.removeObserver(orientationObserver)
+            self.orientationObserver = nil
+        }
+        UIDevice.current.endGeneratingDeviceOrientationNotifications()
+    }
+
 }
 
 @main

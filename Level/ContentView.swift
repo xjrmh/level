@@ -3,7 +3,6 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var viewModel = LevelViewModel()
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @State private var deviceOrientation: UIDeviceOrientation = UIDevice.current.orientation
 
     private var isIPad: Bool {
         horizontalSizeClass == .regular
@@ -11,7 +10,7 @@ struct ContentView: View {
 
     /// Returns the rotation angle in degrees to keep text upright based on device orientation
     private var textRotationAngle: Angle {
-        switch deviceOrientation {
+        switch viewModel.motionManager.deviceOrientation {
         case .landscapeLeft:
             return .degrees(90)
         case .landscapeRight:
@@ -75,12 +74,46 @@ struct ContentView: View {
         GeometryReader { geometry in
             let isLandscape = geometry.size.width > geometry.size.height
             
-            // Bubble mode: entire background turns green based on combined surface angle
-            if viewModel.currentMode == .bubble && !isIPad {
+            if isIPad {
+                // iPad layout: left half (bubble), right half (pitch top, roll bottom)
+                // Toolbar height for iPad is 44 for button + 12 top padding
+                let toolbarHeight: CGFloat = 56
+                let contentTop = safeAreaTop + toolbarHeight
+                let contentHeight = totalHeight - contentTop - safeAreaBottom
+                
+                // Right side layout matches SurfaceLevelView: 66% pitch, 34% roll
+                let dividerSpacing: CGFloat = 6
+                let availableHeight = contentHeight - dividerSpacing
+                let pitchSectionHeight = availableHeight * 0.66
+                
+                // Pitch section extends from top of screen to divider
+                let pitchTotalHeight = contentTop + pitchSectionHeight + 3
+                
+                HStack(spacing: 0) {
+                    // Left half: bubble view - reacts to combined surface angle
+                    Rectangle()
+                        .fill(bubbleModeBackgroundColor())
+                        .frame(width: geometry.size.width / 2)
+                    
+                    // Right half: pitch (top to divider) and roll (below divider)
+                    VStack(spacing: 0) {
+                        // Pitch section (extends to top of screen like bubble view)
+                        Rectangle()
+                            .fill(backgroundColorForAngle(viewModel.pitch))
+                            .frame(height: pitchTotalHeight)
+                        
+                        // Roll section (remaining 34%)
+                        Rectangle()
+                            .fill(backgroundColorForAngle(viewModel.roll))
+                    }
+                    .frame(width: geometry.size.width / 2)
+                }
+            } else if viewModel.currentMode == .bubble {
+                // iPhone bubble mode: entire background turns green based on combined surface angle
                 Rectangle()
                     .fill(bubbleModeBackgroundColor())
             } else if isLandscape {
-                // Landscape: split left/right (roll on left, pitch on right)
+                // iPhone landscape: split left/right (roll on left, pitch on right)
                 HStack(spacing: 0) {
                     // Left section: green when roll is close to 0
                     Rectangle()
@@ -91,7 +124,7 @@ struct ContentView: View {
                         .fill(backgroundColorForAngle(viewModel.pitch))
                 }
             } else {
-                // Portrait surface mode: split top/bottom (pitch on top, roll on bottom)
+                // iPhone portrait surface mode: split top/bottom (pitch on top, roll on bottom)
                 // Calculate the toolbar height (44 for button + 8 top padding)
                 let toolbarHeight: CGFloat = 52
                 
@@ -145,23 +178,16 @@ struct ContentView: View {
         }
         .onAppear {
             viewModel.start()
-            deviceOrientation = UIDevice.current.orientation
         }
-        .onDisappear { viewModel.stop() }
-        .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-            let newOrientation = UIDevice.current.orientation
-            // Only update for valid orientations (ignore face up/down)
-            if newOrientation.isPortrait || newOrientation.isLandscape {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    deviceOrientation = newOrientation
-                }
-            }
+        .onDisappear {
+            viewModel.stop()
         }
         .fullScreenCover(isPresented: $viewModel.showCalibration) {
             CalibrationView(viewModel: viewModel)
         }
         .persistentSystemOverlays(.hidden)
         .animation(.easeInOut(duration: 0.25), value: viewModel.isLevel)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.motionManager.deviceOrientation.rawValue)
     }
 
     // MARK: - iPhone Layout
@@ -185,49 +211,55 @@ struct ContentView: View {
     // MARK: - iPad Layout
 
     private var iPadLayout: some View {
-        VStack(spacing: 0) {
-            // Top toolbar
-            toolbar
-                .padding(.horizontal, 32)
-                .padding(.top, 12)
+        GeometryReader { geometry in
+            ZStack {
+                // Main content
+                VStack(spacing: 0) {
+                    // Top toolbar
+                    toolbar
+                        .padding(.horizontal, 32)
+                        .padding(.top, 12)
 
-            GeometryReader { geometry in
-                HStack(spacing: 0) {
-                    // Left: Bubble view
-                    VStack(spacing: 20) {
-                        BubbleLevelView(viewModel: viewModel)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    HStack(spacing: 0) {
+                        // Left: Bubble view
+                        VStack(spacing: 20) {
+                            BubbleLevelView(viewModel: viewModel)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                        // Angle readings below bubble
-                        HStack(spacing: 24) {
-                            AngleDisplayView(
-                                angle: viewModel.pitch,
-                                label: "Pitch",
-                                color: axisColor(for: viewModel.pitch)
-                            )
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 12)
-                            .rotationEffect(textRotationAngle)
-                            AngleDisplayView(
-                                angle: viewModel.roll,
-                                label: "Roll",
-                                color: axisColor(for: viewModel.roll)
-                            )
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 12)
-                            .rotationEffect(textRotationAngle)
+                            // Angle readings below bubble
+                            HStack(spacing: 24) {
+                                AngleDisplayView(
+                                    angle: viewModel.pitch,
+                                    label: "Pitch",
+                                    color: axisColor(for: viewModel.pitch)
+                                )
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .rotationEffect(textRotationAngle)
+                                AngleDisplayView(
+                                    angle: viewModel.roll,
+                                    label: "Roll",
+                                    color: axisColor(for: viewModel.roll)
+                                )
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .rotationEffect(textRotationAngle)
+                            }
+                            .padding(.bottom, 30)
                         }
-                        .padding(.bottom, 30)
-                    }
-                    .frame(width: geometry.size.width / 2)
-
-                    Divider()
-                        .background(Color.white.opacity(0.15))
-
-                    // Right: Surface level strips
-                    SurfaceLevelView(viewModel: viewModel, textRotationAngle: textRotationAngle)
                         .frame(width: geometry.size.width / 2)
+
+                        // Right: Surface level strips
+                        SurfaceLevelView(viewModel: viewModel, textRotationAngle: textRotationAngle)
+                            .frame(width: geometry.size.width / 2)
+                    }
                 }
+                
+                // Vertical divider extending full height
+                Rectangle()
+                    .fill(Color.white.opacity(0.15))
+                    .frame(width: 0.5)
+                    .ignoresSafeArea()
             }
         }
     }

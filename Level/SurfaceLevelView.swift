@@ -23,8 +23,9 @@ struct SurfaceLevelView: View {
                 .frame(height: topHeight)
                 .padding(.bottom, 3)
 
-                Divider()
-                    .background(Color.white.opacity(0.2))
+                Rectangle()
+                    .fill(Color.white.opacity(0.15))
+                    .frame(height: 0.5)
 
                 // Bottom - Roll
                 AxisLevelStrip(

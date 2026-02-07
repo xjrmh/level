@@ -35,9 +35,6 @@ struct AngleDisplayView: View {
                     .foregroundStyle(color)
                     .contentTransition(.numericText())
 
-                Text("\u{00B0}")
-                    .font(.system(size: isLarge ? 36 : 22, weight: .thin, design: .rounded))
-                    .foregroundStyle(color.opacity(0.8))
             }
         }
     }

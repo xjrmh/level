@@ -1,5 +1,6 @@
 import CoreMotion
 import Combine
+import UIKit
 
 final class MotionManager: ObservableObject {
     enum Mode {
@@ -30,6 +31,9 @@ final class MotionManager: ObservableObject {
     @Published var pitch: Double = 0.0  // Forward/backward tilt
     @Published var roll: Double = 0.0   // Left/right tilt
     @Published var yaw: Double = 0.0
+    
+    // Device orientation derived from gravity (works even when interface is locked)
+    @Published var deviceOrientation: UIDeviceOrientation = .portrait
 
     // Calibration offsets
     @Published var pitchOffset: Double = 0.0
@@ -45,6 +49,7 @@ final class MotionManager: ObservableObject {
     // Filtered values for smooth display
     private var filteredPitch: Double = 0.0
     private var filteredRoll: Double = 0.0
+    private var lastOrientation: UIDeviceOrientation = .portrait
 
     // Update interval: 100Hz for high accuracy
     private let updateInterval: TimeInterval = 1.0 / 100.0
@@ -86,10 +91,18 @@ final class MotionManager: ObservableObject {
                 // Round to 0.01 degree precision
                 let roundedPitch = (self.filteredPitch * 100).rounded() / 100
                 let roundedRoll = (self.filteredRoll * 100).rounded() / 100
+                
+                // Derive device orientation from gravity
+                let gravity = motion.gravity
+                let newOrientation = self.orientationFromGravity(gravity)
 
                 DispatchQueue.main.async {
                     self.pitch = roundedPitch
                     self.roll = roundedRoll
+                    if self.deviceOrientation != newOrientation {
+                        self.deviceOrientation = newOrientation
+                        self.lastOrientation = newOrientation
+                    }
                 }
             }
 
@@ -142,6 +155,29 @@ final class MotionManager: ObservableObject {
     func resetCalibration() {
         pitchOffset = 0.0
         rollOffset = 0.0
+    }
+    
+    /// Derives device orientation from gravity vector with a 3° hysteresis to avoid rapid flips.
+    /// This works even when the interface orientation is locked.
+    private func orientationFromGravity(_ gravity: CMAcceleration) -> UIDeviceOrientation {
+        let faceThreshold = 0.85
+        if gravity.z < -faceThreshold || gravity.z > faceThreshold {
+            return lastOrientation
+        }
+
+        let hysteresis = sin(1.5 * .pi / 180.0)
+        let absX = abs(gravity.x)
+        let absY = abs(gravity.y)
+
+        if absX > absY + hysteresis {
+            return gravity.x < 0 ? .landscapeLeft : .landscapeRight
+        }
+
+        if absY > absX + hysteresis {
+            return gravity.y < 0 ? .portrait : .portraitUpsideDown
+        }
+
+        return lastOrientation
     }
 }
 
