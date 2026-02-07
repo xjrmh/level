@@ -21,9 +21,8 @@ struct ContentView: View {
         }
         .onAppear { viewModel.start() }
         .onDisappear { viewModel.stop() }
-        .sheet(isPresented: $viewModel.showCalibration) {
+        .fullScreenCover(isPresented: $viewModel.showCalibration) {
             CalibrationView(viewModel: viewModel)
-                .presentationDetents([.medium, .large])
         }
         .persistentSystemOverlays(.hidden)
     }

@@ -34,6 +34,7 @@ struct SurfaceLevelView: View {
 
             Divider()
                 .background(Color.white.opacity(0.2))
+                .padding(.vertical, 12)
 
             // Bottom half - Roll
             AxisLevelStrip(
@@ -60,6 +61,7 @@ struct SurfaceLevelView: View {
 
             Divider()
                 .background(Color.white.opacity(0.2))
+                .padding(.horizontal, 12)
 
             // Right half - Pitch
             AxisLevelStrip(
@@ -120,6 +122,7 @@ struct AxisLevelStrip: View {
                 .frame(width: axis == .horizontal ? 280 : 60,
                        height: axis == .horizontal ? 60 : 280)
             }
+            .padding(.vertical, 16)
         }
     }
 

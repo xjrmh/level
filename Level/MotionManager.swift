@@ -2,8 +2,29 @@ import CoreMotion
 import Combine
 
 final class MotionManager: ObservableObject {
+    enum Mode {
+        case real
+        case demo
+    }
+
+    // Default mode: demo in Simulator, real on device (can be overridden at runtime)
+    static var defaultMode: Mode = {
+        #if targetEnvironment(simulator)
+        return .demo
+        #else
+        return .real
+        #endif
+    }()
+
+    private let mode: Mode
+
+    // Demo timer state
+    private var demoTimer: DispatchSourceTimer?
+    private var demoStartDate = Date()
+
     private let motionManager = CMMotionManager()
     private let queue = OperationQueue()
+    private let demoQueue = DispatchQueue(label: "com.level.motion.demo")
 
     // Raw angles in degrees
     @Published var pitch: Double = 0.0  // Forward/backward tilt
@@ -29,44 +50,88 @@ final class MotionManager: ObservableObject {
     private let updateInterval: TimeInterval = 1.0 / 100.0
 
     var isAvailable: Bool {
-        motionManager.isDeviceMotionAvailable
+        switch mode {
+        case .demo:
+            return true
+        case .real:
+            return motionManager.isDeviceMotionAvailable
+        }
     }
 
-    init() {
+    init(mode: Mode = MotionManager.defaultMode) {
+        self.mode = mode
         queue.name = "com.level.motion"
         queue.maxConcurrentOperationCount = 1
     }
 
     func start() {
-        guard motionManager.isDeviceMotionAvailable else { return }
+        switch mode {
+        case .real:
+            guard motionManager.isDeviceMotionAvailable else { return }
 
-        motionManager.deviceMotionUpdateInterval = updateInterval
-        motionManager.startDeviceMotionUpdates(
-            using: .xArbitraryZVertical,
-            to: queue
-        ) { [weak self] motion, error in
-            guard let self = self, let motion = motion, error == nil else { return }
+            motionManager.deviceMotionUpdateInterval = updateInterval
+            motionManager.startDeviceMotionUpdates(
+                using: .xArbitraryZVertical,
+                to: queue
+            ) { [weak self] motion, error in
+                guard let self = self, let motion = motion, error == nil else { return }
 
-            let rawPitch = motion.attitude.pitch * (180.0 / .pi)
-            let rawRoll = motion.attitude.roll * (180.0 / .pi)
+                let rawPitch = motion.attitude.pitch * (180.0 / .pi)
+                let rawRoll = motion.attitude.roll * (180.0 / .pi)
 
-            // Apply low-pass filter for stability while maintaining accuracy
-            self.filteredPitch = self.filteredPitch + self.filterFactor * (rawPitch - self.filteredPitch)
-            self.filteredRoll = self.filteredRoll + self.filterFactor * (rawRoll - self.filteredRoll)
+                // Apply low-pass filter for stability while maintaining accuracy
+                self.filteredPitch = self.filteredPitch + self.filterFactor * (rawPitch - self.filteredPitch)
+                self.filteredRoll = self.filteredRoll + self.filterFactor * (rawRoll - self.filteredRoll)
 
-            // Round to 0.01 degree precision
-            let roundedPitch = (self.filteredPitch * 100).rounded() / 100
-            let roundedRoll = (self.filteredRoll * 100).rounded() / 100
+                // Round to 0.01 degree precision
+                let roundedPitch = (self.filteredPitch * 100).rounded() / 100
+                let roundedRoll = (self.filteredRoll * 100).rounded() / 100
 
-            DispatchQueue.main.async {
-                self.pitch = roundedPitch
-                self.roll = roundedRoll
+                DispatchQueue.main.async {
+                    self.pitch = roundedPitch
+                    self.roll = roundedRoll
+                }
             }
+
+        case .demo:
+            // Simulate smooth changing pitch/roll using sine/cosine waves
+            demoStartDate = Date()
+
+            let timer = DispatchSource.makeTimerSource(queue: demoQueue)
+            timer.schedule(deadline: DispatchTime.now(), repeating: updateInterval)
+            timer.setEventHandler { [weak self] in
+                guard let self = self else { return }
+                let t = Date().timeIntervalSince(self.demoStartDate)
+
+                // Generate demo angles in degrees (±5°)
+                let rawPitch = sin(t * 0.7) * 5.0
+                let rawRoll  = cos(t * 0.9) * 5.0
+
+                // Apply the same low-pass filter for consistency with real mode
+                self.filteredPitch = self.filteredPitch + self.filterFactor * (rawPitch - self.filteredPitch)
+                self.filteredRoll  = self.filteredRoll  + self.filterFactor * (rawRoll  - self.filteredRoll)
+
+                let roundedPitch = (self.filteredPitch * 100).rounded() / 100
+                let roundedRoll  = (self.filteredRoll  * 100).rounded() / 100
+
+                DispatchQueue.main.async {
+                    self.pitch = roundedPitch
+                    self.roll  = roundedRoll
+                }
+            }
+            demoTimer = timer
+            timer.resume()
         }
     }
 
     func stop() {
-        motionManager.stopDeviceMotionUpdates()
+        switch mode {
+        case .real:
+            motionManager.stopDeviceMotionUpdates()
+        case .demo:
+            demoTimer?.cancel()
+            demoTimer = nil
+        }
     }
 
     func calibrate() {
@@ -79,3 +144,4 @@ final class MotionManager: ObservableObject {
         rollOffset = 0.0
     }
 }
+
