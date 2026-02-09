@@ -81,10 +81,10 @@ struct ContentView: View {
                 let contentTop = safeAreaTop + toolbarHeight
                 let contentHeight = totalHeight - contentTop - safeAreaBottom
                 
-                // Right side layout matches SurfaceLevelView: 66% pitch, 34% roll
+                // Right side layout matches SurfaceLevelView: 64.5% pitch, 35.5% roll
                 let dividerSpacing: CGFloat = 6
                 let availableHeight = contentHeight - dividerSpacing
-                let pitchSectionHeight = availableHeight * 0.66
+                let pitchSectionHeight = availableHeight * 0.645
                 
                 // Pitch section extends from top of screen to divider
                 let pitchTotalHeight = contentTop + pitchSectionHeight + 3
@@ -135,10 +135,10 @@ struct ContentView: View {
                 
                 // Match the SurfaceLevelView layout:
                 // dividerSpacing = 6, availableHeight = contentHeight - 6
-                // topHeight = availableHeight * 0.66
+                // topHeight = availableHeight * 0.645
                 let dividerSpacing: CGFloat = 6
                 let availableHeight = contentHeight - dividerSpacing
-                let topSectionHeight = availableHeight * 0.66
+                let topSectionHeight = availableHeight * 0.645
                 
                 // Position includes: safe area top + toolbar + top section + 3pt bottom padding
                 let dividerPosition = contentTop + topSectionHeight + 3
@@ -175,6 +175,12 @@ struct ContentView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .onTapGesture(count: 2) {
+                if !isIPad {
+                    viewModel.toggleMode()
+                }
+            }
         }
         .onAppear {
             viewModel.start()

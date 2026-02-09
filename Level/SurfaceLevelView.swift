@@ -8,7 +8,7 @@ struct SurfaceLevelView: View {
         GeometryReader { geometry in
             let dividerSpacing: CGFloat = 6
             let availableHeight = geometry.size.height - dividerSpacing
-            let topHeight = availableHeight * 0.66
+            let topHeight = availableHeight * 0.645
             let bottomHeight = availableHeight - topHeight
 
             VStack(spacing: 0) {
@@ -18,7 +18,8 @@ struct SurfaceLevelView: View {
                     color: viewModel.levelColor,
                     axis: .vertical,
                     isLevel: abs(viewModel.pitch) < 0.5,
-                    textRotationAngle: textRotationAngle
+                    textRotationAngle: textRotationAngle,
+                    verticalAlignment: .top
                 )
                 .frame(height: topHeight)
                 .padding(.bottom, 3)
@@ -33,7 +34,8 @@ struct SurfaceLevelView: View {
                     color: viewModel.levelColor,
                     axis: .horizontal,
                     isLevel: abs(viewModel.roll) < 0.5,
-                    textRotationAngle: textRotationAngle
+                    textRotationAngle: textRotationAngle,
+                    verticalAlignment: .bottom
                 )
                 .frame(height: bottomHeight)
                 .padding(.top, 3)
@@ -49,6 +51,7 @@ struct AxisLevelStrip: View {
     let isLevel: Bool
     var isCompact: Bool = false
     var textRotationAngle: Angle = .degrees(0)
+    var verticalAlignment: VerticalAlignment = .center
 
     enum Axis {
         case horizontal, vertical
@@ -74,7 +77,7 @@ struct AxisLevelStrip: View {
 
     var body: some View {
         GeometryReader { geometry in
-            VStack(spacing: isCompact ? 16 : 24) {
+            VStack(spacing: isCompact ? 16 : 36) {
                 // Angle display with label aligned to the left
                 HStack(alignment: .center) {
                     Text(labelText)
@@ -119,7 +122,9 @@ struct AxisLevelStrip: View {
                 .frame(width: axis == .horizontal ? trackLength : 60,
                        height: axis == .horizontal ? 60 : trackLength)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: verticalAlignment == .top ? .top : (verticalAlignment == .bottom ? .bottom : .center))
+            .padding(.top, verticalAlignment == .top ? 20 : 0)
+            .padding(.bottom, verticalAlignment == .bottom ? 40 : 0)
         }
     }
 

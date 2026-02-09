@@ -56,7 +56,8 @@ final class LevelViewModel: ObservableObject {
                 if let self = self {
                     HapticManager.shared.checkLevel(
                         pitch: self.pitch,
-                        roll: self.roll
+                        roll: self.roll,
+                        mode: self.currentMode == .bubble ? .bubble : .surface
                     )
                 }
             }

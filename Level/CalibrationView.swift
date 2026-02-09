@@ -3,6 +3,7 @@ import SwiftUI
 struct CalibrationView: View {
     @ObservedObject var viewModel: LevelViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var isSoundEnabled: Bool = HapticManager.shared.isSoundEnabled
 
     private var backgroundColor: Color {
         viewModel.isLevel ? Color.levelBright : Color.black
@@ -55,6 +56,33 @@ struct CalibrationView: View {
                     .padding(.vertical, 20)
 
                     Spacer()
+
+                    // Sound toggle
+                    HStack {
+                        Image(systemName: isSoundEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(isSoundEnabled ? .green : .secondary)
+                            .frame(width: 24)
+                        
+                        Text("Sound when level")
+                            .font(.subheadline)
+                            .foregroundStyle(.white)
+                        
+                        Spacer()
+                        
+                        Toggle("", isOn: $isSoundEnabled)
+                            .labelsHidden()
+                            .tint(.green)
+                            .onChange(of: isSoundEnabled) { _, newValue in
+                                HapticManager.shared.isSoundEnabled = newValue
+                                HapticManager.shared.tapFeedback()
+                            }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.white.opacity(0.06))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal, 24)
 
                     // Actions
                     VStack(spacing: 16) {
