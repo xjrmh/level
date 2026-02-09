@@ -273,10 +273,18 @@ struct ContentView: View {
                 HapticManager.shared.tapFeedback()
                 viewModel.showCalibration = true
             }) {
-                Image(systemName: viewModel.isCalibrated ? "scope" : "circle.dotted")
+                Image(systemName: "scope")
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(viewModel.isCalibrated ? .green : .white.opacity(0.7))
                     .frame(width: 44, height: 44)
+                    .overlay(alignment: .topTrailing) {
+                        if viewModel.isCalibrated {
+                            Circle()
+                                .fill(.green)
+                                .frame(width: 8, height: 8)
+                                .offset(x: -6, y: 10)
+                        }
+                    }
                     .rotationEffect(textRotationAngle)
             }
 

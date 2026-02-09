@@ -35,9 +35,18 @@ final class MotionManager: ObservableObject {
     // Device orientation derived from gravity (works even when interface is locked)
     @Published var deviceOrientation: UIDeviceOrientation = .portrait
 
-    // Calibration offsets
-    @Published var pitchOffset: Double = 0.0
-    @Published var rollOffset: Double = 0.0
+    // Calibration offsets (persisted via UserDefaults)
+    @Published var pitchOffset: Double = 0.0 {
+        didSet { saveCalibration() }
+    }
+    @Published var rollOffset: Double = 0.0 {
+        didSet { saveCalibration() }
+    }
+    
+    // UserDefaults keys for persistence
+    private static let pitchOffsetKey = "com.level.calibration.pitchOffset"
+    private static let rollOffsetKey = "com.level.calibration.rollOffset"
+    private static let isCalibrated = "com.level.calibration.isCalibrated"
 
     // Calibrated angles
     var calibratedPitch: Double { pitch - pitchOffset }
@@ -67,6 +76,29 @@ final class MotionManager: ObservableObject {
         self.mode = mode
         queue.name = "com.level.motion"
         queue.maxConcurrentOperationCount = 1
+        loadCalibration()
+    }
+    
+    // MARK: - Calibration Persistence
+    
+    private func loadCalibration() {
+        let defaults = UserDefaults.standard
+        if defaults.bool(forKey: Self.isCalibrated) {
+            pitchOffset = defaults.double(forKey: Self.pitchOffsetKey)
+            rollOffset = defaults.double(forKey: Self.rollOffsetKey)
+        }
+    }
+    
+    private func saveCalibration() {
+        let defaults = UserDefaults.standard
+        let hasCalibration = pitchOffset != 0.0 || rollOffset != 0.0
+        defaults.set(hasCalibration, forKey: Self.isCalibrated)
+        defaults.set(pitchOffset, forKey: Self.pitchOffsetKey)
+        defaults.set(rollOffset, forKey: Self.rollOffsetKey)
+    }
+    
+    var hasCalibration: Bool {
+        UserDefaults.standard.bool(forKey: Self.isCalibrated)
     }
 
     func start() {
@@ -155,6 +187,7 @@ final class MotionManager: ObservableObject {
     func resetCalibration() {
         pitchOffset = 0.0
         rollOffset = 0.0
+        UserDefaults.standard.set(false, forKey: Self.isCalibrated)
     }
     
     /// Derives device orientation from gravity vector with a 3° hysteresis to avoid rapid flips.

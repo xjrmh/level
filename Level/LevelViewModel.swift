@@ -9,11 +9,13 @@ enum LevelMode: String, CaseIterable {
 final class LevelViewModel: ObservableObject {
     @Published var motionManager: MotionManager
     @Published var currentMode: LevelMode = .surface
-    @Published var isCalibrated = false
+    @Published var isCalibrated: Bool
     @Published var showCalibration = false
 
     init(motionMode: MotionManager.Mode = MotionManager.defaultMode) {
-        self.motionManager = MotionManager(mode: motionMode)
+        let manager = MotionManager(mode: motionMode)
+        self.motionManager = manager
+        self.isCalibrated = manager.hasCalibration
     }
 
     // Convenience init retained for previews/tests that may expect the no-arg initializer
