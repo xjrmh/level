@@ -269,7 +269,10 @@ struct ContentView: View {
     private var toolbar: some View {
         HStack {
             // Calibration button
-            Button(action: { viewModel.showCalibration = true }) {
+            Button(action: {
+                HapticManager.shared.tapFeedback()
+                viewModel.showCalibration = true
+            }) {
                 Image(systemName: viewModel.isCalibrated ? "scope" : "circle.dotted")
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(viewModel.isCalibrated ? .green : .white.opacity(0.7))
@@ -299,7 +302,9 @@ struct ContentView: View {
 
             // Mode toggle (iPhone only)
             if !isIPad {
-                Button(action: { viewModel.toggleMode() }) {
+                Button(action: {
+                    viewModel.toggleMode()
+                }) {
                     Image(systemName: viewModel.currentMode == .bubble ? "square.split.1x2" : "circle.circle")
                         .font(.system(size: 20, weight: .medium))
                         .foregroundStyle(.white.opacity(0.7))

@@ -12,6 +12,9 @@ struct CalibrationView: View {
         NavigationStack {
             ZStack {
                 backgroundColor.ignoresSafeArea()
+                
+                // Dark overlay mask for calibration UI
+                Color.black.opacity(0.3).ignoresSafeArea()
 
                 VStack(spacing: 40) {
                     Spacer()
@@ -31,6 +34,7 @@ struct CalibrationView: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, 40)
                     }
 
@@ -89,6 +93,7 @@ struct CalibrationView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
+                        HapticManager.shared.tapFeedback()
                         dismiss()
                     }
                     .foregroundStyle(.white)
